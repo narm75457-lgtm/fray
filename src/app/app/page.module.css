@@ -74,6 +74,17 @@
   border: 1px solid #eee;
   border-radius: 8px;
   background: #fafafa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.projectItem:hover {
+  background: #f0f0f0;
+  border-color: #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .projectItem h3 {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import styles from './page.module.css'
 
 interface Project {
@@ -87,12 +88,16 @@ export default function AppDashboard() {
         ) : (
           <div className={styles.list}>
             {projects.map((project) => (
-              <div key={project.id} className={styles.projectItem}>
+              <Link
+                key={project.id}
+                href={`/app/projects/${project.id}`}
+                className={styles.projectItem}
+              >
                 <h3>{project.name}</h3>
                 <p className={styles.date}>
                   {new Date(project.createdAt).toLocaleDateString('es-ES')}
                 </p>
-              </div>
+              </Link>
             ))}
           </div>
         )}
