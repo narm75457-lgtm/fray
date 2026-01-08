@@ -1,7 +1,6 @@
-import { default as prisma } from '@/lib/prisma'
-
 export async function GET() {
   try {
+    const { default: prisma } = await import('@/lib/prisma')
     const projects = await prisma.project.findMany({
       orderBy: { createdAt: 'desc' },
     })
@@ -14,6 +13,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const { default: prisma } = await import('@/lib/prisma')
     const body = await request.json()
     const { name } = body
 
