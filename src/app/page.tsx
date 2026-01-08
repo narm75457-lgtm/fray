@@ -5,7 +5,7 @@ export default function Home() {
     <div className={styles.page}>
       <main className={styles.main}>
         <section className={styles.hero}>
-          <h1 className={styles.title}>Antigravity</h1>
+          <h1 className={styles.title}>FRAY</h1>
           <p className={styles.lead}>
             Plataforma experimental para gestionar proyectos en la nube — Prisma + Neon
             listo.

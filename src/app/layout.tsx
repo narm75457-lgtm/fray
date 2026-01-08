@@ -28,7 +28,7 @@ export default function RootLayout({
         <header className="site-header">
           <div className="container header-inner">
             <a className="site-title" href="/">
-              Antigravity
+              FRAY
             </a>
             <nav className="nav">
               <a className="nav-link" href="/">Inicio</a>
@@ -38,7 +38,7 @@ export default function RootLayout({
         </header>
         <main className="container main-content">{children}</main>
         <footer className="site-footer">
-          <div className="container">© {new Date().getFullYear()} Antigravity</div>
+          <div className="container">© {new Date().getFullYear()} FRAY</div>
         </footer>
       </body>
     </html>
