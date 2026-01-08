@@ -1,6 +1,5 @@
-import prisma from '@/lib/prisma'
-
 export async function GET() {
+  const { default: prisma } = await import('@/lib/prisma')
   try {
     const users = await prisma.user.findMany()
     return new Response(JSON.stringify(users), {
