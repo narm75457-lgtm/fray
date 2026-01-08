@@ -19,6 +19,7 @@ export async function GET(
     const { default: prisma } = await import('@/lib/prisma');
     const project = await prisma.project.findUnique({
       where: { id: projectId },
+      include: { founder: true, tests: true },
     });
 
     if (!project) {

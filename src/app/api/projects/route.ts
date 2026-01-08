@@ -14,6 +14,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const { default: prisma } = await import('@/lib/prisma')
+    const { getUserSession } = await import('@/lib/auth')
     const body = await request.json()
     const { name } = body
 
@@ -21,8 +22,16 @@ export async function POST(request: Request) {
       return Response.json({ error: 'Invalid project name' }, { status: 400 })
     }
 
+    const userId = await getUserSession()
+    if (!userId) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const project = await prisma.project.create({
-      data: { name: name.trim() },
+      data: {
+        name: name.trim(),
+        founderId: userId,
+      },
     })
     return Response.json(project, { status: 201 })
   } catch (e) {

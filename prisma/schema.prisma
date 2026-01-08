@@ -8,14 +8,47 @@ datasource db {
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
-  email String @unique
-  name  String
-  role  String
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  name      String
+  createdAt DateTime  @default(now())
+  
+  projects  Project[] @relation("founder")
+  responses TestResponse[]
 }
 
 model Project {
-  id        Int     @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  
+  founderId Int
+  founder   User      @relation("founder", fields: [founderId], references: [id], onDelete: Cascade)
+  
+  tests     Test[]
+}
+
+model Test {
+  id        Int       @id @default(autoincrement())
+  projectId Int
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  title     String
+  questions Json      // Array of {id, question, options[], correctAnswer}
+  createdAt DateTime  @default(now())
+  
+  responses TestResponse[]
+}
+
+model TestResponse {
+  id        Int       @id @default(autoincrement())
+  testId    Int
+  test      Test      @relation(fields: [testId], references: [id], onDelete: Cascade)
+  
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  answers   Json      // Array of {questionId, selectedAnswer}
+  score     Int?
+  submittedAt DateTime @default(now())
 }
