@@ -25,7 +25,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <header className="site-header">
+          <div className="container header-inner">
+            <a className="site-title" href="/">
+              Antigravity
+            </a>
+            <nav className="nav">
+              <a className="nav-link" href="/">Inicio</a>
+              <a className="enter-btn" href="/app">Entrar</a>
+            </nav>
+          </div>
+        </header>
+        <main className="container main-content">{children}</main>
+        <footer className="site-footer">
+          <div className="container">© {new Date().getFullYear()} Antigravity</div>
+        </footer>
       </body>
     </html>
   );
