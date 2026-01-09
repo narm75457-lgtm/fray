@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { setUserSession, clearUserSession } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,8 +18,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const { default: prisma } = await import('@/lib/prisma');
 
     const user = await prisma.user.findUnique({ where: { email } });
 

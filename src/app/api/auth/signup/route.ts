@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { setUserSession } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,8 +13,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const { default: prisma } = await import('@/lib/prisma');
 
     // Check if user already exists - if yes, just log them in
     let user = await prisma.user.findUnique({ where: { email } });
