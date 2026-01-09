@@ -15,31 +15,26 @@ export async function POST(request: NextRequest) {
 
     const { default: prisma } = await import('@/lib/prisma');
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    // Check if user already exists - if yes, just log them in
+    let user = await prisma.user.findUnique({ where: { email } });
 
-    if (existingUser) {
-      return NextResponse.json(
-        { error: 'Email already registered' },
-        { status: 400 }
-      );
+    if (!user) {
+      // Create new user with FOUNDER role
+      user = await prisma.user.create({
+        data: { 
+          email, 
+          name,
+          role: 'FOUNDER'
+        },
+      });
     }
 
-    // Create new user with FOUNDER role
-    const user = await prisma.user.create({
-      data: { 
-        email, 
-        name,
-        role: 'FOUNDER'
-      },
-    });
-
-    // Set session
+    // Set session for both new and existing users
     await setUserSession(user.id);
 
     return NextResponse.json(
       { user: { id: user.id, email: user.email, name: user.name, role: user.role } },
-      { status: 201 }
+      { status: 200 }
     );
   } catch (error) {
     console.error('Signup error:', error);
