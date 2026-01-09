@@ -27,17 +27,25 @@ export default function LoginPage() {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError);
+        setError('Server error. Please try again.');
+        return;
+      }
+
+      if (!data.ok) {
         setError(data.error || 'An error occurred');
         return;
       }
 
-      // Redirect to dashboard
+      // Success - redirect to dashboard
       router.push('/app');
     } catch (err) {
       setError('Network error. Please try again.');
-      console.error(err);
+      console.error('Signup/Login error:', err);
     } finally {
       setLoading(false);
     }
