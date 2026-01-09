@@ -1,47 +1,50 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { setUserSession } from '@/lib/auth';
+import { NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
+  // Always return JSON, no matter what
   try {
-    const body = await request.json().catch(() => ({}));
-    const { email, name } = body;
-
-    // Validate input
-    if (!email || typeof email !== 'string' || !email.trim()) {
+    let body;
+    try {
+      body = await request.json();
+    } catch {
       return NextResponse.json(
-        { ok: false, error: 'Email is required' },
+        { ok: false, error: 'Invalid JSON' },
         { status: 400 }
       );
     }
 
-    if (!name || typeof name !== 'string' || !name.trim()) {
+    const { email, name } = body;
+
+    if (!email || !name) {
       return NextResponse.json(
-        { ok: false, error: 'Name is required' },
+        { ok: false, error: 'Email and name are required' },
         { status: 400 }
       );
     }
 
     try {
-      // Dynamic import to avoid initialization issues
       const { default: prisma } = await import('@/lib/prisma');
+      const { setUserSession } = await import('@/lib/auth');
 
-      // Check if user already exists
+      const cleanEmail = String(email).trim().toLowerCase();
+      const cleanName = String(name).trim();
+
+      // Find or create user
       let user = await prisma.user.findUnique({ 
-        where: { email: email.trim().toLowerCase() } 
+        where: { email: cleanEmail } 
       });
 
       if (!user) {
-        // Create new user with FOUNDER role
         user = await prisma.user.create({
           data: { 
-            email: email.trim().toLowerCase(), 
-            name: name.trim(),
+            email: cleanEmail, 
+            name: cleanName,
             role: 'FOUNDER'
           },
         });
       }
 
-      // Set session for both new and existing users
+      // Set session
       await setUserSession(user.id);
 
       return NextResponse.json(
@@ -50,24 +53,23 @@ export async function POST(request: NextRequest) {
           user: { 
             id: user.id, 
             email: user.email, 
-            name: user.name, 
-            role: user.role 
+            name: user.name
           } 
         },
         { status: 200 }
       );
-    } catch (dbError) {
-      console.error('Database error in signup:', dbError);
+    } catch (dbError: any) {
+      console.error('Database error:', dbError);
       return NextResponse.json(
-        { ok: false, error: 'Failed to create user' },
+        { ok: false, error: dbError?.message || 'Database error' },
         { status: 500 }
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Signup error:', error);
     return NextResponse.json(
-      { ok: false, error: 'Invalid request' },
-      { status: 400 }
+      { ok: false, error: error?.message || 'Server error' },
+      { status: 500 }
     );
   }
 }

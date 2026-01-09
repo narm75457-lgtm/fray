@@ -1,18 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { setUserSession, clearUserSession } from '@/lib/auth';
+import { NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
+  // Always return JSON, no matter what
   try {
-    const body = await request.json().catch(() => ({}));
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { ok: false, error: 'Invalid JSON' },
+        { status: 400 }
+      );
+    }
+
     const { action, email } = body;
 
     if (action === 'logout') {
+      const { clearUserSession } = await import('@/lib/auth');
       await clearUserSession();
       return NextResponse.json({ ok: true }, { status: 200 });
     }
 
-    // Login action
-    if (!email || typeof email !== 'string' || !email.trim()) {
+    if (!email) {
       return NextResponse.json(
         { ok: false, error: 'Email is required' },
         { status: 400 }
@@ -20,21 +29,22 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Dynamic import to avoid initialization issues
       const { default: prisma } = await import('@/lib/prisma');
+      const { setUserSession } = await import('@/lib/auth');
+
+      const cleanEmail = String(email).trim().toLowerCase();
 
       const user = await prisma.user.findUnique({ 
-        where: { email: email.trim().toLowerCase() } 
+        where: { email: cleanEmail } 
       });
 
       if (!user) {
         return NextResponse.json(
-          { ok: false, error: 'User not found. Please sign up first.' },
+          { ok: false, error: 'User not found' },
           { status: 404 }
         );
       }
 
-      // Set session
       await setUserSession(user.id);
 
       return NextResponse.json(
@@ -43,24 +53,23 @@ export async function POST(request: NextRequest) {
           user: { 
             id: user.id, 
             email: user.email, 
-            name: user.name,
-            role: user.role 
+            name: user.name
           } 
         },
         { status: 200 }
       );
-    } catch (dbError) {
-      console.error('Database error in login:', dbError);
+    } catch (dbError: any) {
+      console.error('Database error:', dbError);
       return NextResponse.json(
-        { ok: false, error: 'Authentication failed' },
+        { ok: false, error: dbError?.message || 'Database error' },
         { status: 500 }
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
     return NextResponse.json(
-      { ok: false, error: 'Invalid request' },
-      { status: 400 }
+      { ok: false, error: error?.message || 'Server error' },
+      { status: 500 }
     );
   }
 }
